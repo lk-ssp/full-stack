@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Campus Drive Students</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+        }
+
+        table {
+            margin: auto;
+            border-collapse: collapse;
+            width: 60%;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+
+        tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #ffffff;
+        }
+
+        input {
+            padding: 5px;
+            margin: 5px;
+        }
+
+        button {
+            padding: 6px 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Campus Drive Students</h2>
+
+    <!-- Input Fields -->
+    <input type="text" id="name" placeholder="Student Name">
+    <input type="text" id="company" placeholder="Company Name">
+    <button onclick="addStudent()">Add Student</button>
+
+    <br><br>
+
+    <!-- Table -->
+    <table id="studentTable">
+        <tr>
+            <th>Student Name</th>
+            <th>Company</th>
+        </tr>
+    </table>
+
+    <script>
+        // Load students on page load
+        window.onload = loadData;
+
+        // Add student (POST)
+        function addStudent() {
+            const name = document.getElementById("name").value;
+            const company = document.getElementById("company").value;
+
+            if (!name || !company) {
+                alert("Enter name and company");
+                return;
+            }
+
+            fetch("http://localhost:3000/add", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name, company })
+            })
+            .then(res => res.text())
+            .then(msg => {
+                alert(msg);
+                loadData(); // refresh table
+            })
+            .catch(err => console.log(err));
+        }
+
+        // Get students (GET)
+        function loadData() {
+            fetch("http://localhost:3000/students")
+            .then(response => response.json())
+            .then(data => {
+                const table = document.getElementById("studentTable");
+
+                // Clear old rows (except header)
+                table.innerHTML = `
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Company</th>
+                    </tr>
+                `;
+
+                data.forEach(student => {
+                    let row = table.insertRow();
+
+                    row.insertCell(0).innerHTML = student.name;
+                    row.insertCell(1).innerHTML = student.company;
+                });
+            })
+            .catch(error => console.log("Error:", error));
+        }
+    </script>
+
+</body>
+</html>
